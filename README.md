@@ -2,6 +2,10 @@
 
 Flutter mobile developer test
 
+There were many things that could be done, but I ran into various difficulties that took time
+
+It was also possible to do a lot of small things, like animations, but I decided not to waste time on this now
+
 # Added:
 
 - TabBar: Chats and Users
