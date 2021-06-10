@@ -2,9 +2,7 @@
 
 A new Flutter project.
 
-## Getting Started
-
-Added:
+# Added:
 
 - TabBar: Chats and Users
 - Fab (create new chat on tap) re-work
@@ -16,7 +14,7 @@ Added:
 - If you click the LogOut button you will see ShowBar
 - Other small things
 
-Problems I met:
+# Problems I met:
 
 - In file globals.dart I set host = '10.0.2.2' - to emulator get and display errors (it's emulator host)
 - The project did not want to start because there were problems in the android part of the application, then I opened Android Studio:
