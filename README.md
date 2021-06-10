@@ -1,6 +1,6 @@
 # chat_mobile
 
-A new Flutter project.
+Flutter mobile developer test
 
 # Added:
 
