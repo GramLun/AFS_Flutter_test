@@ -1,5 +1,6 @@
 library chat_mobile.globals;
 
+import 'package:chat_api_client/chat_api_client.dart';
 import 'package:chat_models/chat_models.dart';
 
 const String host = '10.0.2.2';
@@ -8,3 +9,4 @@ const String chatApiAddress = 'http://$host:3333';
 
 String authToken;
 User currentUser;
+int authResponseCode;

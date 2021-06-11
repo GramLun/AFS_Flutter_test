@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'splash_screen.dart';
+import 'ui/splash_screen.dart';
 
 class App extends StatelessWidget {
   // This widget is the root of your application.

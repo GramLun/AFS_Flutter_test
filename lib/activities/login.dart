@@ -1,12 +1,13 @@
 import 'package:chat_api_client/chat_api_client.dart';
+import 'package:chat_mobile/activities/chat_list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chat_models/chat_models.dart';
 import 'package:flutter/material.dart';
 
-import 'api_client.dart';
-import 'globals.dart' as globals;
+import '../components/api_client.dart';
+import '../globals.dart' as globals;
 
 class LoginPage extends StatefulWidget {
-
   static const LOGIN_ROUTE = '/login';
 
   LoginPage({Key key}) : super(key: key);
@@ -21,10 +22,18 @@ class _LoginData {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  // final _secureStorage = UserSecureStorage();
+  final GlobalKey<FormState> _loginFormKey = GlobalKey<FormState>();
   final _LoginData _loginData = _LoginData();
   final TextEditingController _loginController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    _loginController.dispose();
+    super.dispose();
+  }
 
   String _validateLogin(String value) {
     if (value.length < 2) {
@@ -50,29 +59,45 @@ class _LoginPageState extends State<LoginPage> {
           padding: EdgeInsets.all(20.0),
           child: Center(
             child: Form(
-              key: this._formKey,
+              key: _loginFormKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  TextFormField(
-                    controller: _loginController,
-                    validator: this._validateLogin,
-                    onSaved: (String value) {
-                      this._loginData.login = value;
-                    },
-                    decoration: InputDecoration(
-                        hintText: 'Login', labelText: 'Enter your login'),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10.0),
+                    child: TextFormField(
+                      controller: _loginController,
+                      validator: _validateLogin,
+                      textInputAction: TextInputAction.next,
+                      onSaved: (String value) {
+                        _loginData.login = value;
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Login',
+                        labelText: 'Enter your login',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                          borderSide: BorderSide(),
+                        ),
+                      ),
+                    ),
                   ),
                   TextFormField(
                     controller: _passwordController,
                     obscureText: true,
                     // Use secure text for passwords.
-                    validator: this._validatePassword,
+                    validator: _validatePassword,
                     onSaved: (String value) {
-                      this._loginData.password = value;
+                      _loginData.password = value;
                     },
                     decoration: InputDecoration(
-                        hintText: 'Password', labelText: 'Enter your password'),
+                      hintText: 'Password',
+                      labelText: 'Enter your password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        borderSide: BorderSide(),
+                      ),
+                    ),
                   ),
                   Container(
                     margin: EdgeInsets.only(top: 20),
@@ -80,12 +105,12 @@ class _LoginPageState extends State<LoginPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
                         RaisedButton(
-                            child: Text("Login"),
+                            child: Text('Login'),
                             onPressed: () {
                               _login(scaffoldContext);
                             }),
                         FlatButton(
-                          child: Text("Sign up"),
+                          child: Text('Sign up'),
                           onPressed: () {
                             _signUp(scaffoldContext);
                           },
@@ -102,9 +127,10 @@ class _LoginPageState extends State<LoginPage> {
     ));
   }
 
+  // ignore: always_declare_return_types
   _signUp(BuildContext context) {
-    if (this._formKey.currentState.validate()) {
-      _formKey.currentState.save();
+    if (_loginFormKey.currentState.validate()) {
+      _loginFormKey.currentState.save();
       _showDialog(_loginData.login).then((resultValue) {
         if (resultValue != null && resultValue is bool && resultValue) {
           var usersClient = UsersClient(MobileApiClient());
@@ -128,16 +154,36 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  // ignore: always_declare_return_types
   _login(BuildContext context) async {
-    if (this._formKey.currentState.validate()) {
-      _formKey.currentState.save();
+    if (_loginFormKey.currentState.validate()) {
+      _loginFormKey.currentState.save();
 
       try {
         var usersClient = UsersClient(MobileApiClient());
         var user =
             await usersClient.login(_loginData.login, _loginData.password);
         globals.currentUser = user;
-        await Navigator.pushNamed(context, '/chat_list').then((_) {
+
+        var storage = await SharedPreferences.getInstance();
+        await storage.setString('token', globals.authToken);
+
+        var userId = user.json['id'];
+        var userName = user.json['name'];
+        var userPassword = _loginData.password;
+        var userEmail = user.json['email'];
+        var userPhone = user.json['phone'];
+        var userDataList = <String>[
+          userId,
+          userName,
+          userPassword,
+          userEmail,
+          userPhone
+        ];
+        await storage.setStringList('user', userDataList);
+
+        await Navigator.pushNamed(context, ChatListPage.CHAT_LIST_ROUTE)
+            .then((_) {
           globals.currentUser = null;
           globals.authToken = null;
         });

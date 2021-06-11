@@ -2,14 +2,15 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:chat_api_client/chat_api_client.dart';
+import 'package:chat_mobile/activities/chat_list.dart';
 import 'package:chat_models/chat_models.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'api_client.dart';
-import 'chat_component.dart';
-import 'common_ui.dart';
-import 'globals.dart' as globals;
+import '../components/api_client.dart';
+import '../components/chat_component.dart';
+import '../ui/common_ui.dart';
+import '../globals.dart' as globals;
 
 class ChatContentPage extends StatefulWidget {
   ChatContentPage({Key key, @required this.chat, @required this.chatComponent})
@@ -30,13 +31,15 @@ class _ChatContentPageState extends State<ChatContentPage> {
   StreamSubscription<Set<ChatId>> _unreadMessagesSubscription;
   final Set<ChatId> _unreadChats = HashSet<ChatId>();
 
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
     _title = widget.chat.members
         .where((user) => user.id != globals.currentUser.id)
         .map((user) => user.name)
-        .join(", ");
+        .join(', ');
     refreshChatContent();
 
     _messagesSubscription =
@@ -68,7 +71,7 @@ class _ChatContentPageState extends State<ChatContentPage> {
       var msgList =
           await MessagesClient(MobileApiClient()).read(widget.chat.id);
       setState(() {
-        _messages = msgList;
+        _messages = msgList.reversed.toList();
       });
     } on Exception catch (e) {
       print('Failed to get list of messages');
@@ -85,7 +88,8 @@ class _ChatContentPageState extends State<ChatContentPage> {
           tooltip: 'New messages',
           color: Colors.greenAccent,
           onPressed: () {
-            Navigator.popUntil(context, ModalRoute.withName('/chat_list'));
+            Navigator.popUntil(
+                context, ModalRoute.withName(ChatListPage.CHAT_LIST_ROUTE));
           }));
     }
     actions.add(LogoutButton());
@@ -101,6 +105,8 @@ class _ChatContentPageState extends State<ChatContentPage> {
           children: <Widget>[
             Expanded(
               child: ListView.builder(
+                controller: _scrollController,
+                reverse: true,
                 itemCount: _messages.length,
                 itemBuilder: (BuildContext context, int index) {
                   return _buildListTile(_messages[index]);
@@ -120,6 +126,9 @@ class _ChatContentPageState extends State<ChatContentPage> {
                   onPressed: () {
                     if (_sendMessageTextController.text.isNotEmpty) {
                       send(_sendMessageTextController.text);
+                      _scrollController.animateTo(0.0,
+                          duration: const Duration(milliseconds: 180),
+                          curve: Curves.easeOut);
                     }
                   },
                 )
@@ -141,8 +150,8 @@ class _ChatContentPageState extends State<ChatContentPage> {
     );
   }
 
-void send(String message) async {
-    final newMessage = Message(
+  void send(String message) async {
+    final newMessage = MessageModel(
         chat: widget.chat.id,
         author: globals.currentUser,
         text: message,
@@ -166,17 +175,17 @@ class _Bubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bg = isMe ? Colors.white : Colors.greenAccent.shade100;
-    final align = isMe ? CrossAxisAlignment.start : CrossAxisAlignment.end;
+    final align = isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start;
     final radius = isMe
         ? BorderRadius.only(
-            topRight: Radius.circular(5.0),
-            bottomLeft: Radius.circular(10.0),
-            bottomRight: Radius.circular(5.0),
+            topLeft: Radius.circular(7.0),
+            bottomLeft: Radius.circular(7.0),
+            bottomRight: Radius.circular(10.0),
           )
         : BorderRadius.only(
-            topLeft: Radius.circular(5.0),
-            bottomLeft: Radius.circular(5.0),
-            bottomRight: Radius.circular(10.0),
+            topRight: Radius.circular(7.0),
+            bottomLeft: Radius.circular(10.0),
+            bottomRight: Radius.circular(7.0),
           );
     return Column(
       crossAxisAlignment: align,

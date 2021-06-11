@@ -6,13 +6,11 @@ class SplashScreen extends StatelessWidget {
     return Container(
       color: Theme.of(context).primaryColor,
       child: Center(
-        child: Text("Simple Chat",
-          style: TextStyle(
-            color: Colors.white,
-            decoration: TextDecoration.none
-          ),
-        )
-      ),
+          child: Text(
+        'Simple Chat',
+        style: TextStyle(
+            color: Colors.black, fontSize: 20, decoration: TextDecoration.none),
+      )),
     );
   }
 }

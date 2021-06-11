@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:chat_models/chat_models.dart';
 import 'package:flutter/widgets.dart';
 
-typedef void NotificationCallback<T>(T valueObject);
+typedef NotificationCallback<T> = void Function(T valueObject);
 
 /// The component incapsulates websocket connection and provides api to subscribe
 /// for new messages in some particular chat and for notifications about unread messages in any chat.
@@ -22,24 +22,25 @@ class ChatComponent {
   WebSocket _webSocket;
   StreamSubscription _wsStreamSubscription;
 
-  var _chatIdsWithUnreadMessages = HashSet<ChatId>();
+  final _chatIdsWithUnreadMessages = HashSet<ChatId>();
   var _messageStreamControllers = <_ChatMessageStreamControllerWrapper>[];
   var _unreadMessageNotificationControllers = <StreamController<Set<ChatId>>>[];
 
   ChatComponent(this._address);
 
   Future<void> connect() async {
-    Future<WebSocket> ws = WebSocket.connect(_address);
+    var ws = WebSocket.connect(_address);
     await ws.then((webSocket) {
       _webSocket = webSocket;
       _wsStreamSubscription = webSocket.listen((data) {
         if (data is String) {
-          final receivedMessage = Message.fromJson(json.decode(data));
+          final receivedMessage = MessageModel.fromJson(json.decode(data));
           var chatId = receivedMessage.chat;
           var messageConsumed = false;
 
+          _messageStreamControllers
+              .removeWhere((element) => element._streamController.isClosed);
           _messageStreamControllers.forEach((messageStreamControllerWrapper) {
-            // TODO remove closed controllers
             if (!messageStreamControllerWrapper._streamController.isClosed &&
                 (messageStreamControllerWrapper._chatId == chatId)) {
               messageConsumed = true;
@@ -109,13 +110,12 @@ class ChatComponent {
   }
 
   void _notifyUnread() {
+    // new
+    _unreadMessageNotificationControllers
+        .removeWhere((element) => element.isClosed);
     _unreadMessageNotificationControllers
         .forEach((unreadMessageNotificationController) {
-      if (!unreadMessageNotificationController.isClosed) {
-        // TODO remove closed controllers
-        unreadMessageNotificationController.sink
-            .add(_chatIdsWithUnreadMessages);
-      }
+      unreadMessageNotificationController.sink.add(_chatIdsWithUnreadMessages);
     });
   }
 }

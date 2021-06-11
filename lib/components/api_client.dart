@@ -1,6 +1,6 @@
 import 'package:chat_api_client/chat_api_client.dart';
 
-import 'globals.dart' as globals;
+import '../globals.dart' as globals;
 
 class MobileApiClient extends ApiClient {
   MobileApiClient()
@@ -17,6 +17,7 @@ class MobileApiClient extends ApiClient {
           if (response.headers.containsKey('authorization')) {
             globals.authToken = response.headers['authorization'];
           }
+          globals.authResponseCode = response.statusCode;
           return response;
         });
 }
