@@ -1,16 +1,26 @@
 # chat_mobile
 
-A new Flutter project.
+Flutter mobile developer test
 
-## Getting Started
+There were many things that could be done, but I ran into various difficulties that took time
 
-This project is a starting point for a Flutter application.
+It was also possible to do a lot of small things, like animations, but I decided not to waste time on this now
 
-A few resources to get you started if this is your first Flutter project:
+# Added:
 
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
+- TabBar: Chats and Users
+- Fab (create new chat on tap) re-work
+- Save token and refresh when it will expire
+  - I wanted to make a service that would decode the token and then check if it was time to refresh it, but the statusCode (response from server) check was enough
+- Instead of 'Chat List' title = user.name
+- RefreshIndicator
+- User Settings widget
+- If you click the LogOut button you will see ShowBar
+- Other small things
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+# Problems I met:
+
+- In file globals.dart I set host = '10.0.2.2' - to emulator get and display errors (it's emulator host)
+- The project did not want to start because there were problems in the android part of the application, then I opened Android Studio:
+  - set in Android Manifest permission to HTTP
+  - set targetSdkVersion and compileSdkVersion to 28
